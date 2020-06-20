@@ -1,4 +1,7 @@
 ### Changelog:
+v1.2.0
+Made it possible to run ParseIO inside ProcessIO
+
 v1.1.3
 Changing the way the results is returned
 

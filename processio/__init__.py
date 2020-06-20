@@ -1,6 +1,27 @@
 import multiprocessing
-from multiprocessing import Pool
+import multiprocessing.pool
 from time import sleep
+
+
+class NoDaemonProcess(multiprocessing.Process):
+    @property
+    def daemon(self):
+        return False
+
+    @daemon.setter
+    def daemon(self, value):
+        pass
+
+
+class NoDaemonContext(type(multiprocessing.get_context())):
+    Process = NoDaemonProcess
+
+# We sub-class multiprocessing.pool.Pool instead of multiprocessing.Pool
+# because the latter is only a wrapper function, not a proper class.
+class MyPool(multiprocessing.pool.Pool):
+    def __init__(self, *args, **kwargs):
+        kwargs['context'] = NoDaemonContext()
+        super(MyPool, self).__init__(*args, **kwargs)
 
 
 class ProcessIO:
@@ -8,7 +29,7 @@ class ProcessIO:
         self.func = func
         self.args = args
         self.kwargs = kwargs
-        self.pool = Pool(processes=1)
+        self.pool = MyPool(processes=1)
         self.process = self._start_process()
 
     def _start_process(self):
@@ -20,8 +41,6 @@ class ProcessIO:
         return False
 
     def result(self):
-        while self.doing_work():
-            sleep(1)
         result = self.process.get()
         self.pool.close()
         return result
@@ -29,15 +48,15 @@ class ProcessIO:
 
 class ParseIO:
     def __init__(self, function=callable, work=list, processes=False, **kwargs):
+        self.processes = processes
         if not processes:
-            processes = multiprocessing.cpu_count() - 1
+            self.processes = multiprocessing.cpu_count() - 1
         self.func = function
         self.items = work
         self.kwargs = kwargs
-        self.processes = processes
-        self.pool = Pool(processes=processes)
+        self.pool = MyPool(processes=self.processes)
         self.workers = []
-        self.amount = int(len(work) / processes)
+        self.amount = int(len(work) / self.processes)
         self.end = self.amount
         self.start = 0
         self.job_result = []
@@ -73,13 +92,7 @@ class ParseIO:
 
     def result(self) -> list:
         for worker in self.workers:
-            while worker.doing_work():
-                sleep(1)
             res = worker.get()
             self.job_result.append(res)
-
         self.pool.close()
-
         return self.job_result
-
-
