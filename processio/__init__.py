@@ -19,7 +19,9 @@ class ProcessIO:
         return False
 
     def result(self):
-        return self.process.get()
+        result = self.process.get()
+        self.pool.close()
+        return result
 
 
 class ParseIO:

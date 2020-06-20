@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='processio',
-      version='1.1.1',
+      version='1.1.2',
       description='Takes the hassle away from multiprocessing of functions and parsing of big dataset`s.',
       url='https://github.com/AdaptedAS/processio',
       author='Odd Jøren Røland',
