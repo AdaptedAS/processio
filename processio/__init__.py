@@ -1,5 +1,6 @@
 import multiprocessing
 from multiprocessing import Pool
+from time import sleep
 
 
 class ProcessIO:
@@ -19,6 +20,8 @@ class ProcessIO:
         return False
 
     def result(self):
+        while self.doing_work():
+            sleep(1)
         result = self.process.get()
         self.pool.close()
         return result
@@ -70,6 +73,8 @@ class ParseIO:
 
     def result(self) -> list:
         for worker in self.workers:
+            while worker.doing_work():
+                sleep(1)
             res = worker.get()
             self.job_result.append(res)
 
