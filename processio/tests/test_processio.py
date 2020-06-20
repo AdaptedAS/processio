@@ -6,7 +6,7 @@ from processio import ProcessIO, ParseIO
 random_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
 
-def calculate_list(data):
+def calculate_list(data=list):
     total = 0
     for num in data:
         total += num
@@ -76,7 +76,7 @@ class TestProcessIOWorkingStatus(TestCase):
 
 class TestParseIOWorkingStatus(TestCase):
     def test_parseio_result(self):
-        run = ParseIO(calculate_list, random_list, processes=2)
+        run = ParseIO(function=calculate_list, work=random_list, processes=2)
         result = run.result()
 
         self.assertEqual(type(result), list)

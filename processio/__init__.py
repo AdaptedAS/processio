@@ -1,5 +1,5 @@
-from multiprocessing import Pool
 import multiprocessing
+from multiprocessing import Pool
 
 
 class ProcessIO:
@@ -23,15 +23,16 @@ class ProcessIO:
 
 
 class ParseIO:
-    def __init__(self, func, items, processes=False):
+    def __init__(self, function=callable, work=list, processes=False, **kwargs):
         if not processes:
             processes = multiprocessing.cpu_count() - 1
-        self.func = func
-        self.items = items
+        self.func = function
+        self.items = work
+        self.kwargs = kwargs
         self.processes = processes
         self.pool = Pool(processes=processes)
         self.workers = []
-        self.amount = int(len(items) / processes)
+        self.amount = int(len(work) / processes)
         self.end = self.amount
         self.start = 0
         self.job_result = []
@@ -41,7 +42,7 @@ class ParseIO:
         for i in range(self.processes):
             if i + 1 == int(self.processes):
                 self.end = len(self.items)
-            worker = self.pool.apply_async(self.func, [self.items[self.start:self.end]])
+            worker = self.pool.apply_async(self.func, args=[self.items[self.start:self.end]], kwds=self.kwargs)
             self.workers.append(worker)
             self.start += self.amount
             self.end += self.amount
@@ -73,3 +74,5 @@ class ParseIO:
         self.pool.close()
 
         return self.job_result
+
+
